@@ -44,7 +44,7 @@
                 </div>
             </div>
             <div class="hero-right">
-                <img src="hero-bg.jpg" alt="Central Park bicycle taxi" class="hero-image">
+                <img src="js/img/hero.jpeg" alt="Central Park bicycle taxi" class="hero-image">
             </div>
         </div>
     </section>
@@ -55,22 +55,28 @@
             <h2>How It Works</h2>
             <div class="steps">
                 <div class="step-card fade-in">
-                    <img src="step-1.jpg" alt="Pick date and time" class="step-image">
-                    <div class="step-number">01</div>
-                    <h3>Pick date & time</h3>
-                    <p>Choose your preferred date and time for your ride.</p>
+                    <img src="js/img/step1.jpeg" alt="Pick date and time" class="step-image">
+                    <div class="step-body">
+                        <div class="step-number">01</div>
+                        <h3>Pick date & time</h3>
+                        <p>Choose your preferred date and time for your ride.</p>
+                    </div>
                 </div>
                 <div class="step-card fade-in">
-                    <img src="step-2.jpg" alt="Pay securely" class="step-image">
-                    <div class="step-number">02</div>
-                    <h3>Pay securely</h3>
-                    <p>Complete your booking with our secure payment system.</p>
+                    <img src="js/img/step2.jpeg" alt="Pay securely" class="step-image">
+                    <div class="step-body">
+                        <div class="step-number">02</div>
+                        <h3>Pay securely</h3>
+                        <p>Complete your booking with our secure payment system.</p>
+                    </div>
                 </div>
                 <div class="step-card fade-in">
-                    <img src="step-3.jpg" alt="Meet your driver" class="step-image">
-                    <div class="step-number">03</div>
-                    <h3>Meet your driver</h3>
-                    <p>Arrive at your chosen meet-up point and enjoy your ride.</p>
+                    <img src="js/img/step3.jpeg" alt="Meet your driver" class="step-image">
+                    <div class="step-body">
+                        <div class="step-number">03</div>
+                        <h3>Meet your driver</h3>
+                        <p>Arrive at your chosen meet-up point and enjoy your ride.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -107,7 +113,7 @@
                     </div>
                 </div>
                 <div class="route-image-wrapper">
-                    <img src="map-park.jpg" alt="Central Park map" class="route-image">
+                    <img src="js/img/map.jpeg" alt="Central Park map" class="route-image">
                 </div>
             </div>
         </div>
@@ -117,6 +123,7 @@
     <section class="booking" id="book">
         <div class="container">
             <h2>Book Your Ride</h2>
+            <div id="booking-alert" class="booking-alert" hidden></div>
             <div class="booking-card fade-in">
                 <form onsubmit="handleBook(); return false;">
                     <!-- Contact Information -->
@@ -206,7 +213,7 @@
                     </div>
 
                     <!-- Checkout Button -->
-                    <button type="submit" class="checkout-btn">Secure checkout →</button>
+                    <button type="submit" id="checkout-btn" class="checkout-btn">Secure checkout →</button>
                 </form>
             </div>
         </div>
@@ -267,6 +274,8 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="js/config.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

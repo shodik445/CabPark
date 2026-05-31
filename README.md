@@ -40,24 +40,56 @@ This is a **vanilla web application** built with:
 📱 **Fully responsive** design for mobile, tablet, and desktop
 ⌨️ **Form validation** with helpful error messages
 
-## Next Steps
+## Email & payment setup
 
-Once the website is live, the following integrations will be added:
+When a customer books, you get an **email** (EmailJS) and they are sent to **Stripe Checkout** (Netlify function).
 
-### 1. **Stripe Integration**
-- Replace the "Stripe coming soon!" alert with a real Stripe checkout modal
-- Securely process credit card payments
-- Store transaction records
+### 1. EmailJS (booking emails to you)
 
-### 2. **EmailJS Integration**
-- Send booking confirmation emails to customers
-- Notify admins of new bookings with full details
-- Automated reminder emails 24 hours before ride
+1. Create a free account at [emailjs.com](https://www.emailjs.com/)
+2. Add an **Email Service** (Gmail, etc.)
+3. Create an **Email Template** with variables:
+   - `{{to_email}}`, `{{customer_name}}`, `{{customer_email}}`, `{{customer_phone}}`
+   - `{{ride_date}}`, `{{ride_time}}`, `{{adults}}`, `{{kids}}`, `{{duration}}`, `{{total}}`
+   - `{{booking_summary}}` (full text block)
+4. Set **To Email** in the template to `{{to_email}}`
+5. Copy your Public Key, Service ID, and Template ID into `js/config.js`:
 
-### 3. **Deployment**
-- Deploy to **Netlify** for free hosting
-- Set up a custom domain (cabpark.nyc or similar)
-- Enable automatic deployments from GitHub
+```js
+emailjs: {
+  publicKey: "your_public_key",
+  serviceId: "your_service_id",
+  templateId: "your_template_id",
+},
+ownerEmail: "your-email@gmail.com",
+```
+
+### 2. Stripe (online payment)
+
+1. Create a [Stripe](https://dashboard.stripe.com/) account
+2. Deploy this site to **Netlify** (drag-and-drop or Git)
+3. In Netlify → **Site settings → Environment variables**, add:
+   - `STRIPE_SECRET_KEY` = your Stripe secret key (starts with `sk_`)
+4. In `js/config.js` set:
+
+```js
+stripeCheckoutEndpoint: "/.netlify/functions/create-checkout",
+siteUrl: "https://your-site.netlify.app",
+```
+
+5. Run locally with Netlify CLI for full payment testing:
+
+```bash
+npm install
+npx netlify dev
+```
+
+Open the URL Netlify prints (usually `http://localhost:8888`).
+
+### 3. Local testing without Netlify
+
+- Fill in **EmailJS** only → booking sends you an email, no card payment
+- Use **Stripe test keys** and `netlify dev` to test the full checkout flow
 
 ## File Structure
 

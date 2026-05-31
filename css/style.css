@@ -470,8 +470,8 @@ body {
     transform: scale(1.04);
 }
 
-.step-card > div:not(.step-image) {
-    padding: 30px;
+.step-body {
+    padding: 1.75rem 1.75rem 2rem;
 }
 
 .step-number {
@@ -485,20 +485,21 @@ body {
     border-radius: 50%;
     font-size: 20px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 1rem;
 }
 
-.step-card h3 {
+.step-body h3 {
     font-size: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
     font-weight: 600;
     color: var(--text-primary);
 }
 
-.step-card p {
+.step-body p {
     font-size: 14px;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.65;
+    margin: 0;
 }
 
 @media (max-width: 768px) {
@@ -633,6 +634,32 @@ body {
     margin-bottom: 40px;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.booking-alert {
+    max-width: 800px;
+    margin: 0 auto 1.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.booking-alert.success {
+    background-color: rgba(0, 194, 224, 0.12);
+    border: 1px solid rgba(0, 194, 224, 0.35);
+    color: var(--text-primary);
+}
+
+.booking-alert.error {
+    background-color: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.35);
+    color: var(--text-primary);
+}
+
+.checkout-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
 }
 
 .booking-card {
@@ -1135,8 +1162,8 @@ form {
         gap: 16px;
     }
 
-    .step-card > div:not(.step-image) {
-        padding: 16px;
+    .step-body {
+        padding: 1.25rem 1.25rem 1.5rem;
     }
 
     .duration-buttons {

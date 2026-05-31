@@ -127,31 +127,180 @@ function formatPrice(amount) {
 }
 
 // ================================
+// BOOKING HELPERS
+// ================================
+function getConfig() {
+    return window.CABPARK_CONFIG || {};
+}
+
+function getBookingTotal() {
+    return adults * hours * 25 + kids * hours * 15;
+}
+
+function getBookingData() {
+    return {
+        name: document.getElementById("name").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value,
+        adults,
+        kids,
+        hours,
+        durationLabel,
+        total: getBookingTotal(),
+        totalFormatted: formatPrice(getBookingTotal()),
+        siteUrl: getConfig().siteUrl || window.location.origin,
+    };
+}
+
+function showBookingAlert(message, type) {
+    const alertEl = document.getElementById("booking-alert");
+    if (!alertEl) return;
+    alertEl.textContent = message;
+    alertEl.className = `booking-alert ${type}`;
+    alertEl.hidden = false;
+}
+
+function buildBookingSummary(booking) {
+    return [
+        `New CabPark booking`,
+        ``,
+        `Name: ${booking.name}`,
+        `Email: ${booking.email}`,
+        `Phone: ${booking.phone}`,
+        `Date: ${booking.date}`,
+        `Time: ${booking.time}`,
+        `Adults: ${booking.adults}`,
+        `Kids: ${booking.kids}`,
+        `Duration: ${booking.durationLabel}`,
+        `Total: ${booking.totalFormatted}`,
+    ].join("\n");
+}
+
+function isEmailConfigured() {
+    const { emailjs, ownerEmail } = getConfig();
+    return (
+        emailjs &&
+        emailjs.publicKey &&
+        emailjs.serviceId &&
+        emailjs.templateId &&
+        ownerEmail
+    );
+}
+
+function isStripeConfigured() {
+    return Boolean(getConfig().stripeCheckoutEndpoint);
+}
+
+async function sendOwnerEmail(booking) {
+    if (!isEmailConfigured()) {
+        throw new Error(
+            "Email is not configured. Add your EmailJS keys and ownerEmail in js/config.js"
+        );
+    }
+
+    const cfg = getConfig();
+    const emailJsClient = window.emailjs;
+
+    if (!emailJsClient) {
+        throw new Error("EmailJS failed to load. Check your internet connection.");
+    }
+
+    emailJsClient.init(cfg.emailjs.publicKey);
+
+    await emailJsClient.send(cfg.emailjs.serviceId, cfg.emailjs.templateId, {
+        to_email: cfg.ownerEmail,
+        reply_to: booking.email,
+        customer_name: booking.name,
+        customer_email: booking.email,
+        customer_phone: booking.phone,
+        ride_date: booking.date,
+        ride_time: booking.time,
+        adults: booking.adults,
+        kids: booking.kids,
+        duration: booking.durationLabel,
+        total: booking.totalFormatted,
+        booking_summary: buildBookingSummary(booking),
+    });
+}
+
+async function startStripeCheckout(booking) {
+    if (!isStripeConfigured()) {
+        throw new Error(
+            "Stripe is not configured. Set stripeCheckoutEndpoint in js/config.js and deploy to Netlify."
+        );
+    }
+
+    const response = await fetch(getConfig().stripeCheckoutEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(booking),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.error || "Could not start payment.");
+    }
+
+    window.location.href = data.url;
+}
+
+// ================================
 // HANDLE BOOKING SUBMISSION
 // ================================
-function handleBook() {
-    // Get form values
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const date = document.getElementById("date").value;
-    const time = document.getElementById("time").value;
+async function handleBook() {
+    const checkoutBtn = document.getElementById("checkout-btn");
+    const booking = getBookingData();
 
-    // Validate all fields are filled
-    if (!name || !phone || !email || !date || !time) {
-        alert("Please fill in all fields (name, phone, email, date, and time).");
+    if (!booking.name || !booking.phone || !booking.email || !booking.date || !booking.time) {
+        showBookingAlert("Please fill in all fields (name, phone, email, date, and time).", "error");
         return;
     }
 
-    // Validate at least 1 passenger total
     if (adults + kids < 1) {
-        alert("Please select at least 1 passenger (adult or kid).");
+        showBookingAlert("Please select at least 1 passenger (adult or kid).", "error");
         return;
     }
 
-    // If valid, show success alert
-    alert("Redirecting to secure payment... (Stripe coming soon!)");
-    // In a real implementation, this would redirect to Stripe checkout
+    if (booking.total < 1) {
+        showBookingAlert("Total must be at least $1.", "error");
+        return;
+    }
+
+    const originalLabel = checkoutBtn.textContent;
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = "Processing…";
+    document.getElementById("booking-alert").hidden = true;
+
+    try {
+        await sendOwnerEmail(booking);
+
+        if (isStripeConfigured()) {
+            checkoutBtn.textContent = "Redirecting to payment…";
+            await startStripeCheckout(booking);
+            return;
+        }
+
+        showBookingAlert(
+            "Booking sent! You will receive payment instructions soon. (Add Stripe in config to enable online checkout.)",
+            "success"
+        );
+    } catch (err) {
+        showBookingAlert(err.message || "Something went wrong. Please try again.", "error");
+    } finally {
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = originalLabel;
+    }
+}
+
+function handleBookingQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("booking") === "success") {
+        showBookingAlert("Payment successful! We will see you in Central Park.", "success");
+    } else if (params.get("booking") === "cancelled") {
+        showBookingAlert("Payment was cancelled. Your booking email may still have been sent.", "error");
+    }
 }
 
 // ================================
@@ -166,6 +315,7 @@ document.addEventListener("DOMContentLoaded", function() {
     initSmoothScroll();
     initScrollFadeIn();
     initNavbarScroll();
+    handleBookingQueryParams();
 });
 
 // ================================
